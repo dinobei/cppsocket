@@ -1,38 +1,38 @@
 #include "udp_socket.h"
 
-cppsocket::UDPSocket::UDPSocket(ProtocolFamily family) : NativeSocket(family, cppsocket::udp)
+cppsocket::udp_socket::udp_socket(protocol_family family) : native_socket(family, cppsocket::udp)
 {
-    this->createSocket();
+    this->create_socket();
 }
 
-cppsocket::UDPSocket::UDPSocket(int port, std::string addr) : cppsocket::NativeSocket(IPv4, cppsocket::udp)
+cppsocket::udp_socket::udp_socket(int port, std::string addr) : cppsocket::native_socket(IPv4, cppsocket::udp)
 {
-    this->createSocket();
+    this->create_socket();
     if (!initialize(IPv4, port, addr))
         exit(0);
 }
 
-cppsocket::UDPSocket::UDPSocket(ProtocolFamily family, int port, std::string addr) : cppsocket::NativeSocket(family, cppsocket::udp)
+cppsocket::udp_socket::udp_socket(protocol_family family, int port, std::string addr) : cppsocket::native_socket(family, cppsocket::udp)
 {
-    this->createSocket();
+    this->create_socket();
     if (!initialize(family, port, addr))
         exit(0);
 }
 
-cppsocket::UDPSocket::~UDPSocket()
+cppsocket::udp_socket::~udp_socket()
 {
     this->close();
 }
 
-bool cppsocket::UDPSocket::initialize(int port, std::string addr)
+bool cppsocket::udp_socket::initialize(int port, std::string addr)
 {
     return initialize(cppsocket::IPv4, port, addr);
 }
 
-bool cppsocket::UDPSocket::initialize(ProtocolFamily family, int port, std::string addr)
+bool cppsocket::udp_socket::initialize(protocol_family family, int port, std::string addr)
 {
     if (!bind(port,
-              this->getProtocolFamily(),
+              this->get_protocol_family(),
               addr))
     {
         std::cout << "Bind Failed" << std::endl;

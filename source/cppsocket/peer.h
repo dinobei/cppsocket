@@ -15,9 +15,9 @@ namespace cppsocket
         char host[255];   // host length up to 253
         char address[40]; // address length up to 39 (IPv6)
         int ns_family;
-    } NSAddress_D;
+    } address;
 
-    enum NS_RESULT
+    enum result
     {
         NS_SUCCESS = 0,
         NS_INVALID_PARAMETERS = -1,
@@ -29,13 +29,13 @@ namespace cppsocket
         NS_INVALID_PORT = -6,
     };
 
-    enum ProtocolFamily
+    enum protocol_family
     {
         IPv4 = 0,
         IPv6,
     };
 
-    enum SocketOptionType
+    enum socket_option_type
     {
         SOCK_REUSE = 0,
         SOCK_NODELAY = 1,
@@ -49,13 +49,13 @@ namespace cppsocket
         SOCK_IP_ADD_MEMBERSHIP = 9,
     };
 
-    enum SocketType
+    enum socket_type
     {
         tcp = 0,
         udp,
     };
 
-    enum CloseType
+    enum close_type
     {
         read = 0,
         write,
@@ -66,76 +66,76 @@ namespace cppsocket
 #define NS_FAMILY_INET 0
 #define NS_FAMILY_INET6 1
 
-    class Peer
+    class peer
     {
     public:
-        Peer() : sockLen(sizeof(this->sockAddr))
+        peer() : sock_len(sizeof(this->sock_addr))
         {
-            memset(&sockAddr, 0, sizeof(sockAddr));
-            sockAddr.sin_family = AF_INET;
+            memset(&sock_addr, 0, sizeof(sock_addr));
+            sock_addr.sin_family = AF_INET;
         }
 
-        Peer(std::string ip, std::string port) : sockLen(sizeof(this->sockAddr))
+        peer(std::string ip, std::string port) : sock_len(sizeof(this->sock_addr))
         {
-            memset(&sockAddr, 0, sizeof(sockAddr));
-            sockAddr.sin_family = AF_INET;
+            memset(&sock_addr, 0, sizeof(sock_addr));
+            sock_addr.sin_family = AF_INET;
 
-            inet_pton(AF_INET, ip.c_str(), &sockAddr.sin_addr.s_addr);
-            sockAddr.sin_port = htons(atoi(port.c_str()));
+            inet_pton(AF_INET, ip.c_str(), &sock_addr.sin_addr.s_addr);
+            sock_addr.sin_port = htons(atoi(port.c_str()));
         }
 
-        Peer(ProtocolFamily family) : sockLen(sizeof(this->sockAddr))
+        peer(protocol_family family) : sock_len(sizeof(this->sock_addr))
         {
-            memset(&sockAddr, 0, sizeof(sockAddr));
-            if (family == ProtocolFamily::IPv4)
-                sockAddr.sin_family = AF_INET;
+            memset(&sock_addr, 0, sizeof(sock_addr));
+            if (family == protocol_family::IPv4)
+                sock_addr.sin_family = AF_INET;
             else
-                sockAddr.sin_family = AF_INET6;
+                sock_addr.sin_family = AF_INET6;
         }
 
-        Peer(ProtocolFamily family, std::string ip, std::string port) : sockLen(sizeof(this->sockAddr))
+        peer(protocol_family family, std::string ip, std::string port) : sock_len(sizeof(this->sock_addr))
         {
-            memset(&sockAddr, 0, sizeof(sockAddr));
-            if (family == ProtocolFamily::IPv4)
-                sockAddr.sin_family = AF_INET;
+            memset(&sock_addr, 0, sizeof(sock_addr));
+            if (family == protocol_family::IPv4)
+                sock_addr.sin_family = AF_INET;
             else
-                sockAddr.sin_family = AF_INET6;
+                sock_addr.sin_family = AF_INET6;
 
-            inet_pton(AF_INET, ip.c_str(), &sockAddr.sin_addr.s_addr);
-            sockAddr.sin_port = htons(atoi(port.c_str()));
+            inet_pton(AF_INET, ip.c_str(), &sock_addr.sin_addr.s_addr);
+            sock_addr.sin_port = htons(atoi(port.c_str()));
         }
 
-        std::string getIP()
+        std::string get_ip()
         {
             char addr[INET6_ADDRSTRLEN] = {
                 0,
             };
-            inet_ntop(AF_INET, &sockAddr.sin_addr, addr, INET6_ADDRSTRLEN);
+            inet_ntop(AF_INET, &sock_addr.sin_addr, addr, INET6_ADDRSTRLEN);
             return addr;
         }
 
-        void setIP(std::string ip)
+        void set_ip(std::string ip)
         {
-            inet_pton(AF_INET, ip.c_str(), &sockAddr.sin_addr.s_addr);
+            inet_pton(AF_INET, ip.c_str(), &sock_addr.sin_addr.s_addr);
         }
 
-        int getPort()
+        int get_port()
         {
-            return ntohs(sockAddr.sin_port);
+            return ntohs(sock_addr.sin_port);
         }
 
-        void setPort(std::string port)
+        void set_port(std::string port)
         {
-            sockAddr.sin_port = htons(atoi(port.c_str()));
+            sock_addr.sin_port = htons(atoi(port.c_str()));
         }
 
-        ProtocolFamily getProtocolFamily()
+        protocol_family get_protocol_family()
         {
-            if (sockAddr.sin_family == AF_INET)
+            if (sock_addr.sin_family == AF_INET)
             {
                 return IPv4;
             }
-            else if (sockAddr.sin_family == AF_INET)
+            else if (sock_addr.sin_family == AF_INET)
             {
                 return IPv6;
             }
@@ -145,18 +145,18 @@ namespace cppsocket
             }
         }
 
-        void setProtocolFamily(ProtocolFamily family)
+        void set_protocol_family(protocol_family family)
         {
-            sockAddr.sin_family = (family == IPv4) ? IPv4 : IPv6;
+            sock_addr.sin_family = (family == IPv4) ? IPv4 : IPv6;
         }
 
-        std::string getKey()
+        std::string get_key()
         {
-            return getIP() + ":" + std::to_string(getPort());
+            return get_ip() + ":" + std::to_string(get_port());
         }
 
     public:
-        sockaddr_in sockAddr;
-        socklen_t sockLen;
+        sockaddr_in sock_addr;
+        socklen_t sock_len;
     };
 }

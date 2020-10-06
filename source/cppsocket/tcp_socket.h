@@ -14,20 +14,20 @@ namespace cppsocket
 {
     static std::string __base_addr = "";
     static int __base_backlog = 10;
-    static ProtocolFamily __base_family = IPv4;
+    static protocol_family __base_family = IPv4;
 
-    class TCPSocket : public NativeSocket
+    class tcp_socket : public native_socket
     {
     public:
-        TCPSocket(ushort port, std::string addr = __base_addr, int backlog = __base_backlog, ProtocolFamily family = __base_family);
-        TCPSocket(int sock);
-        TCPSocket(ProtocolFamily family = __base_family);
+        tcp_socket(ushort port, std::string addr = __base_addr, int backlog = __base_backlog, protocol_family family = __base_family);
+        tcp_socket(int sock);
+        tcp_socket(protocol_family family = __base_family);
 
     public:
-        std::shared_ptr<TCPSocket> accept();
+        std::shared_ptr<tcp_socket> accept();
         int event(int msec);
 
     private:
-        bool initialize(int port, int backlog, std::string addr, ProtocolFamily family);
+        bool initialize(int port, int backlog, std::string addr, protocol_family family);
     };
 }

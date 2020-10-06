@@ -22,4 +22,4 @@ int readv(const int sock, const struct iovec *iov, int nvecs)
     return -1;
 }
 
-#endif // __CPPSOCKET_WINDOWS__
+#endif

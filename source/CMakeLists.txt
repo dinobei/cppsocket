@@ -12,7 +12,6 @@ list(APPEND cppsocket_include_directories ${CMAKE_CURRENT_LIST_DIR})
 set(cppsocket_include_directories ${cppsocket_include_directories} PARENT_SCOPE)
 
 include_directories(${cppsocket_include_directories})
-message("@@@: " ${cppsocket_include_directories})
 add_library(${the_library} ${the_library_type} ${cppsocket_source_files} ${cppsocket_header_files})
 target_link_libraries(${the_library} ${cppsocket_library_dependencies})
 

@@ -5,12 +5,12 @@
 int main(int argc, char *argv[])
 {
     int tryCnt = 0;
-    cppsocket::TCPSocket sock;
+    cppsocket::tcp_socket sock;
     while (true)
     {
-        if (sock.connect("127.0.0.1", "9000", 1000))
+        if (sock.connect("127.0.0.1", "9000"))
         {
-            std::cout << "Connect Success" << std::endl;
+            std::cout << "Connected" << std::endl;
             break;
         }
         else
@@ -19,24 +19,24 @@ int main(int argc, char *argv[])
         }
     }
 
-    char sendBuf[11] = "1234567890";
-    char recvBuf[11] = {
+    char send_buf[11] = "1234567890";
+    char recv_buf[11] = {
         0,
     };
 
-    if (!sock.safeSend(sendBuf, 10))
+    if (!sock.safe_send(send_buf, 10))
     {
         std::cout << "send error" << std::endl;
         return -1;
     }
-    std::cout << "msg send success: " << sendBuf << std::endl;
+    std::cout << "msg send success: " << send_buf << std::endl;
 
-    if (!sock.safeRecv(recvBuf, 10))
+    if (!sock.safe_recv(recv_buf, 10))
     {
         std::cout << "recv error" << std::endl;
         return -1;
     }
-    std::cout << "msg from server: " << recvBuf << std::endl;
+    std::cout << "msg from server: " << recv_buf << std::endl;
 
     sock.close();
     return 0;

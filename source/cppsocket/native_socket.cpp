@@ -1,64 +1,64 @@
 #include "native_socket.h"
 
-cppsocket::NativeSocket::NativeSocket(int sockId) : sockId(sockId)
+cppsocket::native_socket::native_socket(int sock_id) : sock_id(sock_id)
 {
-    assignPeerInfo(sockId);
+    assign_peer_info(sock_id);
 }
 
-cppsocket::NativeSocket::NativeSocket(ProtocolFamily family, SocketType type) : family(family), type(type) {}
+cppsocket::native_socket::native_socket(protocol_family family, socket_type type) : family(family), type(type) {}
 
-void cppsocket::NativeSocket::close()
+void cppsocket::native_socket::close()
 {
 #if defined(__CPPSOCKET_WINDOWS__)
-    closesocket(this->sockId);
+    closesocket(this->sock_id);
 #else
-    ::close(this->sockId);
+    ::close(this->sock_id);
 #endif
 }
 
-bool cppsocket::NativeSocket::close(enum CloseType type)
+bool cppsocket::native_socket::close(enum close_type type)
 {
 #if defined(__CPPSOCKET_WINDOWS__)
     switch (type)
     {
     case read:
-        shutdown(this->sockId, SD_RECEIVE);
+        shutdown(this->sock_id, SD_RECEIVE);
         break;
     case write:
-        shutdown(this->sockId, SD_SEND);
+        shutdown(this->sock_id, SD_SEND);
         break;
     default:
-        shutdown(this->sockId, SD_BOTH);
+        shutdown(this->sock_id, SD_BOTH);
         break;
     }
 #else
     switch (type)
     {
     case read:
-        shutdown(this->sockId, SHUT_RD);
+        shutdown(this->sock_id, SHUT_RD);
         break;
     case write:
-        shutdown(this->sockId, SHUT_WR);
+        shutdown(this->sock_id, SHUT_WR);
         break;
     default:
-        shutdown(this->sockId, SHUT_RDWR);
+        shutdown(this->sock_id, SHUT_RDWR);
         break;
     }
 #endif
     return true;
 }
 
-bool cppsocket::NativeSocket::safeSend(char *buffer, const int bytes)
+bool cppsocket::native_socket::safe_send(char *buffer, const int bytes)
 {
-    return safeSend(buffer, 0, bytes);
+    return safe_send(buffer, 0, bytes);
 }
 
-bool cppsocket::NativeSocket::safeSend(char *buffer, const int offset, const int bytes, const int opt)
+bool cppsocket::native_socket::safe_send(char *buffer, const int offset, const int bytes, const int opt)
 {
     int totalSendBytes = 0, sendBytes = 0;
     while (1)
     {
-        sendBytes = ::send(sockId,
+        sendBytes = ::send(sock_id,
                            &buffer[offset + totalSendBytes],
                            bytes - totalSendBytes,
                            opt);
@@ -77,17 +77,17 @@ bool cppsocket::NativeSocket::safeSend(char *buffer, const int offset, const int
     return true;
 }
 
-bool cppsocket::NativeSocket::safeRecv(char *buffer, const int bytes)
+bool cppsocket::native_socket::safe_recv(char *buffer, const int bytes)
 {
-    return safeRecv(buffer, 0, bytes);
+    return safe_recv(buffer, 0, bytes);
 }
 
-bool cppsocket::NativeSocket::safeRecv(char *buffer, const int offset, const int bytes, const int opt)
+bool cppsocket::native_socket::safe_recv(char *buffer, const int offset, const int bytes, const int opt)
 {
     int totalRecvBytes = 0, recvBytes = 0;
     while (1)
     {
-        recvBytes = ::recv(sockId,
+        recvBytes = ::recv(sock_id,
                            &buffer[offset + totalRecvBytes],
                            bytes - totalRecvBytes,
                            opt);
@@ -106,71 +106,71 @@ bool cppsocket::NativeSocket::safeRecv(char *buffer, const int offset, const int
     return true;
 }
 
-int cppsocket::NativeSocket::writev(const struct iovec *iov, const int iovcount)
+int cppsocket::native_socket::writev(const struct iovec *iov, const int iovcount)
 {
-    return ::writev(sockId, iov, iovcount);
+    return ::writev(sock_id, iov, iovcount);
 }
 
-int cppsocket::NativeSocket::readv(const struct iovec *iov, const int iovcount)
+int cppsocket::native_socket::readv(const struct iovec *iov, const int iovcount)
 {
-    return ::readv(sockId, iov, iovcount);
+    return ::readv(sock_id, iov, iovcount);
 }
 
-std::string cppsocket::NativeSocket::getSockIP()
+std::string cppsocket::native_socket::get_sock_ip()
 {
     struct sockaddr_in addr;
     socklen_t addr_size = sizeof(struct sockaddr_in);
-    int ret = getsockname(sockId, (struct sockaddr *)&addr, &addr_size);
+    int ret = getsockname(sock_id, (struct sockaddr *)&addr, &addr_size);
     if (ret != 0)
         return std::string();
 
     return inet_ntoa(addr.sin_addr);
 }
 
-std::string cppsocket::NativeSocket::getSockPort()
+std::string cppsocket::native_socket::get_sock_port()
 {
     struct sockaddr_in addr;
     socklen_t addr_size = sizeof(struct sockaddr_in);
-    int ret = getsockname(sockId, (struct sockaddr *)&addr, &addr_size);
+    int ret = getsockname(sock_id, (struct sockaddr *)&addr, &addr_size);
     if (ret != 0)
         return std::string();
 
     return std::to_string(ntohs(addr.sin_port));
 }
 
-std::string cppsocket::NativeSocket::getPeerIP()
+std::string cppsocket::native_socket::get_peer_ip()
 {
     struct sockaddr_in addr;
     socklen_t addr_size = sizeof(struct sockaddr_in);
-    int ret = getpeername(sockId, (struct sockaddr *)&addr, &addr_size);
+    int ret = getpeername(sock_id, (struct sockaddr *)&addr, &addr_size);
     if (ret != 0)
         return std::string();
 
     return inet_ntoa(addr.sin_addr);
 }
 
-std::string cppsocket::NativeSocket::getPeerPort()
+std::string cppsocket::native_socket::get_peer_port()
 {
     struct sockaddr_in addr;
     socklen_t addr_size = sizeof(struct sockaddr_in);
-    int ret = getpeername(sockId, (struct sockaddr *)&addr, &addr_size);
+    int ret = getpeername(sock_id, (struct sockaddr *)&addr, &addr_size);
     if (ret != 0)
         return std::string();
 
     return std::to_string(ntohs(addr.sin_port));
 }
 
-cppsocket::SocketType cppsocket::NativeSocket::getSocketType()
+cppsocket::socket_type cppsocket::native_socket::get_socket_type()
 {
     return type;
 }
 
-cppsocket::ProtocolFamily cppsocket::NativeSocket::getProtocolFamily()
+cppsocket::protocol_family cppsocket::native_socket::get_protocol_family()
 {
     return family;
 }
 
-int cppsocket::NativeSocket::Domain2address(const char *host, NSAddress_D *addr)
+int cppsocket::native_socket::domain2address(const char *host, address *addr)
 {
     if (host == NULL || addr == NULL)
     {
@@ -185,7 +185,7 @@ int cppsocket::NativeSocket::Domain2address(const char *host, NSAddress_D *addr)
         0,
     };
 
-    memset(addr, 0, sizeof(NSAddress_D));
+    memset(addr, 0, sizeof(address));
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_flags = AI_PASSIVE;
@@ -235,20 +235,20 @@ int cppsocket::NativeSocket::Domain2address(const char *host, NSAddress_D *addr)
     return NS_UNKNOWN_ERROR;
 }
 
-bool cppsocket::NativeSocket::option(SocketOptionType type, void *arg)
+bool cppsocket::native_socket::option(socket_option_type type, void *arg)
 {
     switch (type)
     {
     case SOCK_REUSE:
     {
         int option = *(int *)arg;
-        setsockopt(this->sockId, SOL_SOCKET, SO_REUSEADDR, (char *)&option, (int)sizeof(option));
+        setsockopt(this->sock_id, SOL_SOCKET, SO_REUSEADDR, (char *)&option, (int)sizeof(option));
     }
     break;
     case SOCK_NODELAY:
     {
         int option = *(int *)arg;
-        setsockopt(this->sockId, IPPROTO_TCP, TCP_NODELAY, (char *)&option, (int)sizeof(option));
+        setsockopt(this->sock_id, IPPROTO_TCP, TCP_NODELAY, (char *)&option, (int)sizeof(option));
     }
     break;
     case SOCK_LINGER:
@@ -257,19 +257,19 @@ bool cppsocket::NativeSocket::option(SocketOptionType type, void *arg)
         struct linger lng;
         lng.l_onoff = option;
         lng.l_linger = 0;
-        setsockopt(this->sockId, SOL_SOCKET, SO_LINGER, (char *)&lng, sizeof(lng));
+        setsockopt(this->sock_id, SOL_SOCKET, SO_LINGER, (char *)&lng, sizeof(lng));
     }
     break;
     case SOCK_RCVTIMEO_MS:
     {
         int option = *(int *)arg;
 #if defined(__CPPSOCKET_WINDOWS__)
-        setsockopt(sockId, SOL_SOCKET, SO_RCVTIMEO, (char *)&option, sizeof(option));
+        setsockopt(sock_id, SOL_SOCKET, SO_RCVTIMEO, (char *)&option, sizeof(option));
 #else
         struct timeval tv_timeo;
         tv_timeo.tv_sec = option / 1000;
         tv_timeo.tv_usec = (option % 1000) * 1000;
-        setsockopt(this->sockId, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv_timeo, sizeof(tv_timeo));
+        setsockopt(this->sock_id, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv_timeo, sizeof(tv_timeo));
 #endif
     }
     break;
@@ -277,37 +277,37 @@ bool cppsocket::NativeSocket::option(SocketOptionType type, void *arg)
     {
         int option = *(int *)arg;
 #if defined(__CPPSOCKET_WINDOWS__)
-        setsockopt(sockId, SOL_SOCKET, SO_SNDTIMEO, (char *)&option, sizeof(option));
+        setsockopt(sock_id, SOL_SOCKET, SO_SNDTIMEO, (char *)&option, sizeof(option));
 #else
         struct timeval tv_timeo;
         tv_timeo.tv_sec = option / 1000;
         tv_timeo.tv_usec = (option % 1000) * 1000;
-        setsockopt(this->sockId, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv_timeo, sizeof(tv_timeo));
+        setsockopt(this->sock_id, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv_timeo, sizeof(tv_timeo));
 #endif
     }
     break;
     case SOCK_RCVBUFFER:
     {
         int option = *(int *)arg;
-        setsockopt(this->sockId, SOL_SOCKET, SO_RCVBUF, (char *)&option, sizeof(int));
+        setsockopt(this->sock_id, SOL_SOCKET, SO_RCVBUF, (char *)&option, sizeof(int));
     }
     break;
     case SOCK_SNDBUFFER:
     {
         int option = *(int *)arg;
-        setsockopt(this->sockId, SOL_SOCKET, SO_SNDBUF, (char *)&option, sizeof(int));
+        setsockopt(this->sock_id, SOL_SOCKET, SO_SNDBUF, (char *)&option, sizeof(int));
     }
     break;
     case SOCK_BROADCAST:
     {
         int option = *(int *)arg;
-        setsockopt(this->sockId, SOL_SOCKET, SO_BROADCAST, (char *)&option, sizeof(option));
+        setsockopt(this->sock_id, SOL_SOCKET, SO_BROADCAST, (char *)&option, sizeof(option));
     }
     break;
     case SOCK_IP_MULTICAST_TTL:
     {
         int ttl = *(int *)arg;
-        setsockopt(this->sockId, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl));
+        setsockopt(this->sock_id, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl));
     }
     break;
     case SOCK_IP_ADD_MEMBERSHIP:
@@ -317,7 +317,7 @@ bool cppsocket::NativeSocket::option(SocketOptionType type, void *arg)
         struct ip_mreq join_adr;
         join_adr.imr_multiaddr.s_addr = inet_addr(option); // multicast group address
         join_adr.imr_interface.s_addr = htons(INADDR_ANY);
-        setsockopt(this->sockId, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&join_adr, sizeof(join_adr));
+        setsockopt(this->sock_id, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&join_adr, sizeof(join_adr));
     }
     break;
     }
@@ -325,15 +325,15 @@ bool cppsocket::NativeSocket::option(SocketOptionType type, void *arg)
     return true;
 }
 
-void cppsocket::NativeSocket::setSocketIdentifier(int socketId)
+void cppsocket::native_socket::set_socket_identifier(int sock_id)
 {
-    assignPeerInfo(socketId);
+    assign_peer_info(sock_id);
 }
 
-bool cppsocket::NativeSocket::connect(std::string hostname, std::string service, int ms)
+bool cppsocket::native_socket::connect(std::string hostname, std::string service, int ms)
 {
 #if defined(__CPPSOCKET_WINDOWS__)
-    createSocket();
+    create_socket();
 
     struct sockaddr_in serv_addr;
 
@@ -342,36 +342,36 @@ bool cppsocket::NativeSocket::connect(std::string hostname, std::string service,
     serv_addr.sin_port = htons(atoi(service.c_str()));
     inet_pton(AF_INET, hostname.c_str(), &serv_addr.sin_addr.s_addr);
 
-    ULONG nonBlk = TRUE;
+    ULONG nonblk = TRUE;
 
-    if (ioctlsocket(this->sockId, FIONBIO, &nonBlk) == SOCKET_ERROR)
+    if (ioctlsocket(this->sock_id, FIONBIO, &nonblk) == SOCKET_ERROR)
         return false;
 
-    int ret = ::connect(this->sockId, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    int ret = ::connect(this->sock_id, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
     if (ret == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
         return false;
 
     fd_set fdset;
     FD_ZERO(&fdset);
-    FD_SET(this->sockId, &fdset);
+    FD_SET(this->sock_id, &fdset);
 
-    struct timeval timevalue;
-    timevalue.tv_sec = ms / 1000;
-    timevalue.tv_usec = (ms % 1000) * 1000;
+    struct timeval tv;
+    tv.tv_sec = ms / 1000;
+    tv.tv_usec = (ms % 1000) * 1000;
 
-    if (select(0, NULL, &fdset, NULL, &timevalue) == SOCKET_ERROR)
+    if (select(0, NULL, &fdset, NULL, &tv) == SOCKET_ERROR)
         return false;
 
-    if (!FD_ISSET(sockId, &fdset))
+    if (!FD_ISSET(sock_id, &fdset))
     {
         this->close();
-        sockId = INVALID_SOCKET;
+        sock_id = INVALID_SOCKET;
         return false;
     }
 
-    nonBlk = FALSE;
-    if (ioctlsocket(sockId, FIONBIO, &nonBlk) == SOCKET_ERROR)
+    nonblk = FALSE;
+    if (ioctlsocket(sock_id, FIONBIO, &nonblk) == SOCKET_ERROR)
         return false;
 
     return true;
@@ -405,8 +405,8 @@ bool cppsocket::NativeSocket::connect(std::string hostname, std::string service,
     do
     {
         struct sockaddr_in *ts;
-        sockId = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-        if (sockId < 0)
+        sock_id = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+        if (sock_id < 0)
             continue;
 
         int sr_ms = 500;
@@ -415,10 +415,10 @@ bool cppsocket::NativeSocket::connect(std::string hostname, std::string service,
 
         ts = (struct sockaddr_in *)res->ai_addr;
 
-        if (connectNonblock((struct sockaddr *)res->ai_addr, res->ai_addrlen, ms) == 0)
+        if (connect_nonblock((struct sockaddr *)res->ai_addr, res->ai_addrlen, ms) == 0)
             break;
 
-        ::close(sockId);
+        ::close(sock_id);
     } while ((res = res->ai_next) != NULL);
 
     if (res == NULL)
@@ -431,7 +431,7 @@ bool cppsocket::NativeSocket::connect(std::string hostname, std::string service,
 #endif
 }
 
-bool cppsocket::NativeSocket::bind(int port, cppsocket::ProtocolFamily family, std::string hostaddr)
+bool cppsocket::native_socket::bind(int port, cppsocket::protocol_family family, std::string hostaddr)
 {
     int retv;
     struct sockaddr_in serv_addr;
@@ -456,7 +456,7 @@ bool cppsocket::NativeSocket::bind(int port, cppsocket::ProtocolFamily family, s
 
     serv_addr.sin_port = htons(port);
 
-    retv = ::bind(sockId, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    retv = ::bind(sock_id, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
     if (retv != 0)
     {
@@ -467,17 +467,17 @@ bool cppsocket::NativeSocket::bind(int port, cppsocket::ProtocolFamily family, s
     return true;
 }
 
-void cppsocket::NativeSocket::assignPeerInfo(int sockId)
+void cppsocket::native_socket::assign_peer_info(int sock_id)
 {
     struct sockaddr_in addr;
     socklen_t addr_size = sizeof(struct sockaddr_in);
-    int ret = getpeername(sockId, (struct sockaddr *)&addr, &addr_size);
+    int ret = getpeername(sock_id, (struct sockaddr *)&addr, &addr_size);
     assert(ret == 0);
 
-    sockIP = getSockIP();
-    sockPort = getSockPort();
-    peerIP = inet_ntoa(addr.sin_addr);
-    peerPort = std::to_string(ntohs(addr.sin_port));
+    sock_ip = get_sock_ip();
+    sock_port = get_sock_port();
+    peer_ip = inet_ntoa(addr.sin_addr);
+    peer_port = std::to_string(ntohs(addr.sin_port));
 
     if (addr.sin_family == AF_INET)
     {
@@ -492,15 +492,15 @@ void cppsocket::NativeSocket::assignPeerInfo(int sockId)
         assert(false);
     }
 
-    int socketType;
-    socklen_t socketTypeLength = sizeof(socketType);
-    ret = getsockopt(sockId, SOL_SOCKET, SO_TYPE, reinterpret_cast<SOCKOPT_TYPE *>(&socketType), &socketTypeLength);
+    int socket_type;
+    socklen_t socket_type_length = sizeof(socket_type);
+    ret = getsockopt(sock_id, SOL_SOCKET, SO_TYPE, reinterpret_cast<SOCKOPT_TYPE *>(&socket_type), &socket_type_length);
     assert(ret == 0);
-    if (socketType == SOCK_DGRAM)
+    if (socket_type == SOCK_DGRAM)
     {
         this->type = cppsocket::udp;
     }
-    else if (socketType == SOCK_STREAM)
+    else if (socket_type == SOCK_STREAM)
     {
         this->type = cppsocket::tcp;
     }
@@ -510,50 +510,50 @@ void cppsocket::NativeSocket::assignPeerInfo(int sockId)
     }
 }
 
-ssize_t cppsocket::NativeSocket::sendTo(Peer *peer, char *buffer, const unsigned int bytes, const int opt)
+ssize_t cppsocket::native_socket::sendto(peer *peer, char *buffer, const unsigned int bytes, const int opt)
 {
-    return ::sendto(this->getSocketIdentifier(), buffer, bytes, opt, (struct sockaddr *)&peer->sockAddr, peer->sockLen);
+    return ::sendto(this->get_socket_identifier(), buffer, bytes, opt, (struct sockaddr *)&peer->sock_addr, peer->sock_len);
 }
 
-ssize_t cppsocket::NativeSocket::sendTo(Peer *peer, char *buffer, const unsigned int offset, const unsigned int bytes, const int opt)
+ssize_t cppsocket::native_socket::sendto(peer *peer, char *buffer, const unsigned int offset, const unsigned int bytes, const int opt)
 {
-    return ::sendto(this->getSocketIdentifier(), &buffer[offset], bytes, opt, (struct sockaddr *)&peer->sockAddr, peer->sockLen);
+    return ::sendto(this->get_socket_identifier(), &buffer[offset], bytes, opt, (struct sockaddr *)&peer->sock_addr, peer->sock_len);
 }
 
-ssize_t cppsocket::NativeSocket::recvFrom(Peer *peer, char *buffer, const unsigned int bytes, const int opt)
+ssize_t cppsocket::native_socket::recvfrom(peer *peer, char *buffer, const unsigned int bytes, const int opt)
 {
-    return ::recvfrom(this->getSocketIdentifier(), buffer, bytes, opt, (struct sockaddr *)&peer->sockAddr, &peer->sockLen);
+    return ::recvfrom(this->get_socket_identifier(), buffer, bytes, opt, (struct sockaddr *)&peer->sock_addr, &peer->sock_len);
 }
 
-ssize_t cppsocket::NativeSocket::recvFrom(Peer *peer, char *buffer, const unsigned int offset, const unsigned int bytes, const int opt)
+ssize_t cppsocket::native_socket::recvfrom(peer *peer, char *buffer, const unsigned int offset, const unsigned int bytes, const int opt)
 {
-    return ::recvfrom(this->getSocketIdentifier(), &buffer[offset], bytes, opt, (struct sockaddr *)&peer->sockAddr, &peer->sockLen);
+    return ::recvfrom(this->get_socket_identifier(), &buffer[offset], bytes, opt, (struct sockaddr *)&peer->sock_addr, &peer->sock_len);
 }
 
-ssize_t cppsocket::NativeSocket::send(char *buffer, const unsigned int bytes, const int opt)
+ssize_t cppsocket::native_socket::send(char *buffer, const unsigned int bytes, const int opt)
 {
-    return ::send(this->getSocketIdentifier(), buffer, bytes, opt);
+    return ::send(this->get_socket_identifier(), buffer, bytes, opt);
 }
 
-ssize_t cppsocket::NativeSocket::send(char *buffer, const int offset, const int unsigned bytes, const int opt)
+ssize_t cppsocket::native_socket::send(char *buffer, const int offset, const int unsigned bytes, const int opt)
 {
-    return ::send(this->getSocketIdentifier(), &buffer[offset], bytes, opt);
+    return ::send(this->get_socket_identifier(), &buffer[offset], bytes, opt);
 }
 
-ssize_t cppsocket::NativeSocket::recv(char *buffer, const unsigned int bytes, const int opt)
+ssize_t cppsocket::native_socket::recv(char *buffer, const unsigned int bytes, const int opt)
 {
-    return ::recv(this->getSocketIdentifier(), buffer, bytes, opt);
+    return ::recv(this->get_socket_identifier(), buffer, bytes, opt);
 }
 
-ssize_t cppsocket::NativeSocket::recv(char *buffer, const int offset, const unsigned int bytes, const int opt)
+ssize_t cppsocket::native_socket::recv(char *buffer, const int offset, const unsigned int bytes, const int opt)
 {
-    return ::recv(this->getSocketIdentifier(), &buffer[offset], bytes, opt);
+    return ::recv(this->get_socket_identifier(), &buffer[offset], bytes, opt);
 }
 
 #if !defined(__CPPSOCKET_WINDOWS__)
 
 using namespace std::chrono;
-void cppsocket::NativeSocket::delayIfNeeded(long int timeout_ms)
+void cppsocket::native_socket::delay_if_needed(long int timeout_ms)
 {
     auto timeout = milliseconds(timeout_ms);
     auto current = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
@@ -566,24 +566,24 @@ void cppsocket::NativeSocket::delayIfNeeded(long int timeout_ms)
     last = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 }
 
-int cppsocket::NativeSocket::connectNonblock(const struct sockaddr *saptr, int salen, const int ms)
+int cppsocket::native_socket::connect_nonblock(const struct sockaddr *saptr, int salen, const int ms)
 {
     int flags, n, error;
     socklen_t len;
     fd_set rset, wset;
-    struct timeval tval;
+    struct timeval tv;
 
-    flags = fcntl(this->sockId, F_GETFL, 0);
-    fcntl(this->sockId, F_SETFL, flags | O_NONBLOCK);
+    flags = fcntl(this->sock_id, F_GETFL, 0);
+    fcntl(this->sock_id, F_SETFL, flags | O_NONBLOCK);
 
     error = 0;
 
-    if ((n = ::connect(this->sockId, (struct sockaddr *)saptr, salen)) < 0)
+    if ((n = ::connect(this->sock_id, (struct sockaddr *)saptr, salen)) < 0)
     {
         if (errno != EINPROGRESS)
         {
             std::cout << "errno is not EINPROGRESS" << std::endl;
-            delayIfNeeded(ms);
+            delay_if_needed(ms);
             return -1;
         }
     }
@@ -592,23 +592,23 @@ int cppsocket::NativeSocket::connectNonblock(const struct sockaddr *saptr, int s
         goto done; /* connect completed immediately */
 
     FD_ZERO(&rset);
-    FD_SET(this->sockId, &rset);
+    FD_SET(this->sock_id, &rset);
     wset = rset;
 
-    tval.tv_sec = ms / 1000;
-    tval.tv_usec = (ms % 1000) * 1000;
-    if ((n = select(this->sockId + 1, &rset, &wset, NULL, &tval)) == 0)
+    tv.tv_sec = ms / 1000;
+    tv.tv_usec = (ms % 1000) * 1000;
+    if ((n = select(this->sock_id + 1, &rset, &wset, NULL, &tv)) == 0)
     {
         this->close(); /* timeout */
         errno = ETIMEDOUT;
         return -1;
     }
-    if (FD_ISSET(this->sockId, &rset) || FD_ISSET(this->sockId, &wset))
+    if (FD_ISSET(this->sock_id, &rset) || FD_ISSET(this->sock_id, &wset))
     {
         len = sizeof(error);
-        if (getsockopt(this->sockId, SOL_SOCKET, SO_ERROR, reinterpret_cast<SOCKOPT_TYPE *>(&error), &len) < 0)
+        if (getsockopt(this->sock_id, SOL_SOCKET, SO_ERROR, reinterpret_cast<SOCKOPT_TYPE *>(&error), &len) < 0)
         {
-            delayIfNeeded(ms);
+            delay_if_needed(ms);
             return -1; /* Solaris pending error */
         }
     }
@@ -616,17 +616,17 @@ int cppsocket::NativeSocket::connectNonblock(const struct sockaddr *saptr, int s
     {
         // printf("select error: sockfd not set\n");
         // printf("* select error\n");
-        delayIfNeeded(ms);
+        delay_if_needed(ms);
         return -1;
     }
 
 done:
-    fcntl(this->sockId, F_SETFL, flags); /* restore file status flags */
+    fcntl(this->sock_id, F_SETFL, flags); /* restore file status flags */
     if (error)
     {
         this->close(); /* just in case */
         errno = error;
-        delayIfNeeded(ms);
+        delay_if_needed(ms);
         return -1;
     }
 
@@ -635,9 +635,9 @@ done:
 
 #endif
 
-void cppsocket::NativeSocket::createSocket()
+void cppsocket::native_socket::create_socket()
 {
-    this->sockId = socket((this->family == IPv4) ? AF_INET : AF_INET6,
+    this->sock_id = socket((this->family == IPv4) ? AF_INET : AF_INET6,
                           (this->type == cppsocket::tcp) ? SOCK_STREAM : SOCK_DGRAM,
                           (this->type == cppsocket::tcp) ? IPPROTO_TCP : IPPROTO_UDP);
 }
