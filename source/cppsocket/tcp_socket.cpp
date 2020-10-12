@@ -25,6 +25,8 @@ std::shared_ptr<cppsocket::tcp_socket> cppsocket::tcp_socket::accept()
     csock = ::accept(this->sock_id, (struct sockaddr *)&client_addr, (socklen_t *)&size);
 #endif
 
+    if(csock < 0) return nullptr;
+    
     char buffer[INET6_ADDRSTRLEN] = {
         0,
     };
